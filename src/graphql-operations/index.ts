@@ -12,6 +12,16 @@ mutation AddCurrency {
 }
 `
 
+// export const INSERT_CURRENCY_ONE = gql`
+//     mutation AddCurrency($object: currency_insert_input!)  {
+//         insert_Currency2_one(object: $object){
+//             currency_id
+//             description
+//             symbol
+//         }
+//     }
+// `
+
 export const DELETE_CURRENCY_ONE = gql`
   mutation deleteCurrency {
     delete_Currency2(where: {currency_id: {_eq: 3}}) {
@@ -21,7 +31,7 @@ export const DELETE_CURRENCY_ONE = gql`
 `
 
 export const DELETE_CURRENCY_BY_PK = gql`
-    mutation delete_Currency2_by_pk($currency_id: Int = 3) {
+    mutation delete_Currency2_by_pk($currency_id: Int!) {
         delete_Currency2_by_pk(currency_id: $currency_id) {
             currency_id
             description

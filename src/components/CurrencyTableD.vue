@@ -28,7 +28,7 @@
           vertical
         ></v-divider>
         <v-spacer></v-spacer>
-        <button @click="query.refetch()">Refresh</button>
+        <!-- <button @click="query.refetch()">Refresh</button> -->
         <v-dialog
           v-model="dialog"
           max-width="500px"
@@ -121,13 +121,13 @@
       <v-icon
         size="small"
         class="me-2"
-        @click="editItem(item.raw)"
+        @click="editItem(item)"
       >
         mdi-pencil
       </v-icon>
       <v-icon
         size="small"
-        @click="deleteItem(item.raw)"
+        @click="deleteItem(item)"
       >
         mdi-delete
       </v-icon>
@@ -161,87 +161,7 @@
   } from "@apollo/client/core";
 
   export default {
-    setup() {
-
-    const token = 'etocr5knAOXscScx3OKeFgZgcR4obKe5lwOYCQSpdVpO767xraBZVm0gupQF9YkF';
-    // HTTP connection to the API
-    const httpLink = createHttpLink({
-      // You should use an absolute URL here
-      uri: "https://ewa-23.hasura.app/v1/graphql",
-          headers: {
-           // Authorization: token ? `Bearer ${token}` : '',
-             'x-hasura-admin-secret': token,
-          },
-    });
-
-
-    // Cache implementation
-    const cache = new InMemoryCache();
-
-    // Create the apollo client
-    const apolloClient = new ApolloClient({
-      // token: token,
-      link: httpLink,
-      cache,
-    });
-
-    const my_currency = gql`
-      query {
-        Currency2 {
-          currency_id
-          description
-          symbol
-        }
-      }
-    `;
-
-    const { result, loading } = provideApolloClient(apolloClient)(() =>
-      useQuery(my_currency)
-    ); // { data, loading, error }
-
-    watch(result, (value) => {
-      console.log(value, "OK");
-    });
-
-    const { mutate: insertCurrency } = provideApolloClient(apolloClient)(() =>
-      useMutation(INSERT_CURRENCY_ONE, {
-      // variables: {
-      //     where: {
-      //         is_completed: { _eq: true },
-      //         is_public: { _eq: false },
-      //     },
-      //   },
-        refetchQueries: [
-            {
-                query: SELECT_TODOS
-            },
-        ],
-      
-      }
-    
-    ));
-
-    const { mutate: deleteCurrency } = provideApolloClient(apolloClient)(() =>
-      useMutation(DELETE_CURRENCY_BY_PK //, 
-        // {
-        //   delete_Currency2_by_pk: {
-        //       currency_id: 3, 
-        //   },
-        // }
-    ));
-
-    const { query: reload } = provideApolloClient(apolloClient)(() =>
-      useQuery(SELECT_TODOS)
-    );
-
-    return {
-      result,
-      loading,
-      reload,
-      insertCurrency,
-      deleteCurrency,
-    };
-  },
+ 
     data: () => ({
       dialog: false,
       dialogDelete: false,
@@ -270,37 +190,10 @@
       },
     
   }),
-  // mounted() {
-  //   axios
-  //     .get('http://localhost:8090/api/rest/Currency')
-  //     .then((response) => {
-  //       console.log(response);
-  //       this.currency = response.data.currency
-  //     })
-  // },
-    
-    computed: {
-      formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
-      },
-    },
 
-    watch: {
-      dialog (val) {
-        val || this.close()
-      },
-      dialogDelete (val) {
-        val || this.closeDelete()
-      },
-    },
-
-    created () {
-      this.initialize()
-    },
-
-    methods: {
+  methods: {
       initialize () {
-       //debugger;
+      // debugger;
       //  axios
       //   .get('http://localhost:8090/api/rest/Currency')
       //   .then((response) => {
@@ -376,6 +269,121 @@
         console.log("Update result", result)
       },
     },
+
+     setup() {
+
+    const token = 'etocr5knAOXscScx3OKeFgZgcR4obKe5lwOYCQSpdVpO767xraBZVm0gupQF9YkF';
+    // HTTP connection to the API
+    const httpLink = createHttpLink({
+      // You should use an absolute URL here
+      uri: "https://ewa-23.hasura.app/v1/graphql",
+          headers: {
+           // Authorization: token ? `Bearer ${token}` : '',
+             'x-hasura-admin-secret': token,
+          },
+    });
+
+
+    // Cache implementation
+    const cache = new InMemoryCache();
+
+    // Create the apollo client
+    const apolloClient = new ApolloClient({
+      // token: token,
+      link: httpLink,
+      cache,
+    });
+
+    const my_currency = gql`
+      query {
+        Currency2 {
+          currency_id
+          description
+          symbol
+        }
+      }
+    `;
+
+    const { result, loading } = provideApolloClient(apolloClient)(() =>
+      useQuery(my_currency)
+    ); // { data, loading, error }
+
+    watch(result, (value) => {
+      console.log(value, "OK");
+    });
+
+    const { mutate: insertCurrency } = provideApolloClient(apolloClient)(() =>
+      useMutation(INSERT_CURRENCY_ONE, {
+      // variables: {
+      //     where: {
+      //         is_completed: { _eq: true },
+      //         is_public: { _eq: false },
+      //     },
+      //   },
+        refetchQueries: [
+            {
+                query: SELECT_TODOS
+            },
+        ],
+      
+      }
+    
+    ));
+
+    const { mutate: deleteCurrency } = provideApolloClient(apolloClient)(() =>
+      useMutation(DELETE_CURRENCY_BY_PK , 
+        {
+          variables: {
+            currency_id: 3,
+            // currency_id: item.currency_id,
+        },
+          // delete_Currency2_by_pk: {
+          //     currency_id: 3, 
+          // },
+        }
+    ));
+
+    const { query: reload } = provideApolloClient(apolloClient)(() =>
+      useQuery(SELECT_TODOS)
+    );
+
+    return {
+      result,
+      loading,
+      reload,
+      insertCurrency,
+      deleteCurrency,
+    };
+  },
+  // mounted() {
+  //   axios
+  //     .get('http://localhost:8090/api/rest/Currency')
+  //     .then((response) => {
+  //       console.log(response);
+  //       this.currency = response.data.currency
+  //     })
+  // },
+    
+    computed: {
+      formTitle () {
+        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+      },
+    },
+
+    watch: {
+      dialog (val) {
+        val || this.close()
+      },
+      dialogDelete (val) {
+        val || this.closeDelete()
+      },
+    },
+
+    created () {
+      this.initialize()
+    },
+
+    
   }
 
 
