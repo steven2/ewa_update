@@ -1,33 +1,40 @@
 import { gql } from "graphql-tag"
 
-export const INSERT_CURRENCY_ONE = gql`
-
-mutation AddCurrency {
-  insert_Currency2_one(object: {currency_id: 3, description: "Euro", symbol: "EUR"}) {
-    currency_id
-    description
-    symbol
-  }
-
-}
-`
-
 // export const INSERT_CURRENCY_ONE = gql`
-//     mutation AddCurrency($object: currency_insert_input!)  {
-//         insert_Currency2_one(object: $object){
-//             currency_id
-//             description
-//             symbol
-//         }
-//     }
+
+// mutation AddCurrency {
+//   insert_Currency2_one(object: {currency_id: 3, description: "Euro", symbol: "EUR"}) {
+//     currency_id
+//     description
+//     symbol
+//   }
+
+// }
 // `
 
-export const DELETE_CURRENCY_ONE = gql`
-  mutation deleteCurrency {
-    delete_Currency2(where: {currency_id: {_eq: 3}}) {
-      affected_rows
+export const INSERT_CURRENCY_ONE = gql`
+    mutation AddCurrency($currency_id: Int!, $description: String!, $symbol: String!)  {
+        insert_Currency2_one(object: {
+            currency_id: $currency_id, 
+            description: $description, 
+            symbol: $symbol}) {
+                currency_id
+                description
+                symbol
+            }
     }
-  }
+
+`
+
+
+export const UPDATE_CURRENCY_BY_PK = gql`
+    mutation update_Currency2_by_pk($pk_columns: Currency2_pk_columns_input!, $_set: Currency2_set_input!) {
+        update_Currency2_by_pk(pk_columns: $pk_columns, _set: $_set) {
+            currency_id
+            description
+            symbol
+        }
+    }
 `
 
 export const DELETE_CURRENCY_BY_PK = gql`
@@ -36,6 +43,18 @@ export const DELETE_CURRENCY_BY_PK = gql`
             currency_id
             description
             symbol
+        }
+    }
+`
+
+export const DELETE_TODOS_BY_PK = gql`
+    mutation delete_todos_by_pk($id: Int!) {
+        delete_todos_by_pk(id: $id) {
+            id
+            title
+            is_completed
+            created_at
+            is_public
         }
     }
 `
@@ -74,17 +93,7 @@ export const UPDATE_TODO_BY_PK = gql`
     }
 `
 
-export const DELETE_TODOS_BY_PK = gql`
-    mutation delete_todos_by_pk($id: Int!) {
-        delete_todos_by_pk(id: $id) {
-            id
-            title
-            is_completed
-            created_at
-            is_public
-        }
-    }
-`
+
 
 export const DELETE_TODOS = gql`
     mutation delete_todos($where: todos_bool_exp!) {

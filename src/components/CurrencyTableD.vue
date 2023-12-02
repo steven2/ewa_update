@@ -152,7 +152,7 @@
   import { provideApolloClient } from "@vue/apollo-composable";
   import { gql } from "graphql-tag";
   import { useMutation } from "@vue/apollo-composable"
-  import { INSERT_CURRENCY_ONE, DELETE_CURRENCY_BY_PK, SELECT_TODOS } from "../graphql-operations"
+  import { INSERT_CURRENCY_ONE, DELETE_CURRENCY_BY_PK } from "../graphql-operations"
 
   import {
     ApolloClient,
@@ -314,55 +314,112 @@
 
     const { mutate: insertCurrency } = provideApolloClient(apolloClient)(() =>
       useMutation(INSERT_CURRENCY_ONE, {
-      // variables: {
-      //     where: {
-      //         is_completed: { _eq: true },
-      //         is_public: { _eq: false },
-      //     },
-      //   },
-        refetchQueries: [
-            {
-                query: SELECT_TODOS
-            },
-        ],
+        variables: {
+          currency_id: 3, 
+          description: "Euro", 
+          symbol: "EUR"
+        },
+ 
+        // update: (cache, { data }) => {
+        //     cache.modify({
+        //         fields: {
+        //             Currency2: (existingCurrencies, { readField }) => {
+        //                 return existingCurrencies.filter(
+        //                     (CurrenciesRef) => data.insert_Currency2_one.currency_id !== readField("currency_id", CurrenciesRef)
+        //                 )
+        //             },
+        //         },
+        //     })
+        // },
+
+        // update(cache, { data }) {
+        //       cache.modify({
+        //           fields: {
+        //               Currency2(existingCurrencies = []) {
+        //                   const newCurrencyRef = cache.writeFragment({
+        //                       data,
+        //                       fragment: gql`
+        //                           fragment NewCurrency on Currency2 {
+        //                               currency_id
+        //                               description
+        //                               symbol
+        //                           }
+        //                       `,
+        //                   })
+        //                   return [newCurrencyRef, ...existingCurrencies]
+        //               },
+        //           },
+        //       })
+        //   },
+
+        update: (cache, { data: { variables } }) => {
+          let data = cache.readQuery({ query: my_currency })
+          variables = {
+            currency_id: 3, 
+            description: "Euro", 
+            symbol: "EUR",
+            __typename: "Currency2"
+          },
+          data = {
+            ...data,
+            Currency2: [
+              ...data.Currency2,
+              variables,
+            ],
+          }
+          cache.writeQuery({ query: my_currency, data })
+        }  
+
+        // update: (cache, { data: { variables } }) => {
+          
+        //   const data = cache.readQuery({ query: my_currency });
+
+        //   variables = {
+        //     currency_id: 3, 
+        //     description: "Euro", 
+        //     symbol: "EUR",
+        //     __typename: "Currency2"
+        //   },
+        //   data.Currency2.push(variables);
+        //   cache.writeQuery({ query: my_currency, data });
+        // },
       
       }
     
     ));
+
 
     const { mutate: deleteCurrency } = provideApolloClient(apolloClient)(() =>
       useMutation(DELETE_CURRENCY_BY_PK , 
         {
           variables: {
             currency_id: 3,
-            // currency_id: item.currency_id,
-        },
-          // delete_Currency2_by_pk: {
-          //     currency_id: 3, 
-          // },
+          },
+
+          update: (cache, { data }) => {
+              cache.modify({
+                  fields: {
+                      Currency2: (existingCurrencies, { readField }) => {
+                          return existingCurrencies.filter(
+                              (CurrenciesRef) => data.delete_Currency2_by_pk.currency_id !== readField("currency_id", CurrenciesRef)
+                          )
+                      },
+                  },
+              })
+          },
+
         }
+       
     ));
 
-    const { query: reload } = provideApolloClient(apolloClient)(() =>
-      useQuery(SELECT_TODOS)
-    );
 
     return {
       result,
       loading,
-      reload,
       insertCurrency,
       deleteCurrency,
     };
   },
-  // mounted() {
-  //   axios
-  //     .get('http://localhost:8090/api/rest/Currency')
-  //     .then((response) => {
-  //       console.log(response);
-  //       this.currency = response.data.currency
-  //     })
-  // },
     
     computed: {
       formTitle () {
