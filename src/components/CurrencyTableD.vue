@@ -152,7 +152,7 @@
   import { provideApolloClient } from "@vue/apollo-composable";
   import { gql } from "graphql-tag";
   import { useMutation } from "@vue/apollo-composable"
-  import { INSERT_CURRENCY_ONE, DELETE_CURRENCY_BY_PK } from "../graphql-operations"
+  import { INSERT_CURRENCY_ONE, UPDATE_CURRENCY_BY_PK, DELETE_CURRENCY_BY_PK } from "../graphql-operations"
 
   import {
     ApolloClient,
@@ -240,34 +240,41 @@
 
       save () {
         if (this.editedIndex > -1) {
-          Object.assign(this.result.Currency2[this.editedIndex], this.editedItem)
+          //Object.assign(this.result.Currency2[this.editedIndex], this.editedItem)
+          this.editC(this.editedItem);
         } else {
           // this.result.Currency2.push(this.editedItem)
-          this.insertC();
-          this.update();
+          this.insertC(this.editedItem);
         }
         this.close()
       },
 
-      insertC() {
-
-        const result = this.insertCurrency()
+      insertC(items) {
+        var element = {"__typename": "Currency2"};
+        // add element to the object items
+        items = Object.assign(items, element);
+        const result = this.insertCurrency(items)
         //this.$apollo.queries.Currency2.refetch()
         console.log("Insert completed result", result)
 
       },
 
+      editC(items) {
+        var element = {"__typename": "Currency2"};
+        // add element to the object items
+        items = Object.assign(items, element);
+        const result = this.updateCurrency(items)
+        console.log("Update completed result", result)
+
+      },
+
       deleteC(item) {
         var oKey = this.result.Currency2[item].currency_id;
-        const result = this.deleteCurrency(oKey)
+        const result = this.deleteCurrency( {currency_id: oKey })
         console.log("Delete completed result", result)
 
       },   
       
-      update() {
-        const result = this.reload;
-        console.log("Update result", result)
-      },
     },
 
      setup() {
@@ -312,54 +319,13 @@
       console.log(value, "OK");
     });
 
+    // Insert Currency
     const { mutate: insertCurrency } = provideApolloClient(apolloClient)(() =>
       useMutation(INSERT_CURRENCY_ONE, {
-        variables: {
-          currency_id: 3, 
-          description: "Euro", 
-          symbol: "EUR"
-        },
- 
-        // update: (cache, { data }) => {
-        //     cache.modify({
-        //         fields: {
-        //             Currency2: (existingCurrencies, { readField }) => {
-        //                 return existingCurrencies.filter(
-        //                     (CurrenciesRef) => data.insert_Currency2_one.currency_id !== readField("currency_id", CurrenciesRef)
-        //                 )
-        //             },
-        //         },
-        //     })
-        // },
 
-        // update(cache, { data }) {
-        //       cache.modify({
-        //           fields: {
-        //               Currency2(existingCurrencies = []) {
-        //                   const newCurrencyRef = cache.writeFragment({
-        //                       data,
-        //                       fragment: gql`
-        //                           fragment NewCurrency on Currency2 {
-        //                               currency_id
-        //                               description
-        //                               symbol
-        //                           }
-        //                       `,
-        //                   })
-        //                   return [newCurrencyRef, ...existingCurrencies]
-        //               },
-        //           },
-        //       })
-        //   },
-
-        update: (cache, { data: { variables } }) => {
+        update: (cache, { data: { insert_Currency2_one } }) => {  
           let data = cache.readQuery({ query: my_currency })
-          variables = {
-            currency_id: 3, 
-            description: "Euro", 
-            symbol: "EUR",
-            __typename: "Currency2"
-          },
+          var variables = insert_Currency2_one;
           data = {
             ...data,
             Currency2: [
@@ -369,32 +335,35 @@
           }
           cache.writeQuery({ query: my_currency, data })
         }  
-
-        // update: (cache, { data: { variables } }) => {
-          
-        //   const data = cache.readQuery({ query: my_currency });
-
-        //   variables = {
-        //     currency_id: 3, 
-        //     description: "Euro", 
-        //     symbol: "EUR",
-        //     __typename: "Currency2"
-        //   },
-        //   data.Currency2.push(variables);
-        //   cache.writeQuery({ query: my_currency, data });
-        // },
       
       }
     
     ));
 
+    // Edit Currency
+    const { mutate: updateCurrency } = provideApolloClient(apolloClient)(() =>
+     useMutation(UPDATE_CURRENCY_BY_PK , 
+        {
+          update: (cache, { data: { update_Currency2_by_pk } }) => {
+            let data = cache.readQuery({ query: my_currency })
+            var variables = update_Currency2_by_pk;
+            data = {
+              ...data,
+              Currency2: [
+                ...data.Currency2,
+                variables,
+              ],
+            }
+            cache.writeQuery({ query: my_currency, data })
+          }  
+        }
 
+     )); 
+
+    // Delete Currency
     const { mutate: deleteCurrency } = provideApolloClient(apolloClient)(() =>
       useMutation(DELETE_CURRENCY_BY_PK , 
         {
-          variables: {
-            currency_id: 3,
-          },
 
           update: (cache, { data }) => {
               cache.modify({
@@ -417,6 +386,7 @@
       result,
       loading,
       insertCurrency,
+      updateCurrency,
       deleteCurrency,
     };
   },

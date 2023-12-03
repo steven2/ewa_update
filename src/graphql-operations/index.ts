@@ -28,12 +28,15 @@ export const INSERT_CURRENCY_ONE = gql`
 
 
 export const UPDATE_CURRENCY_BY_PK = gql`
-    mutation update_Currency2_by_pk($pk_columns: Currency2_pk_columns_input!, $_set: Currency2_set_input!) {
-        update_Currency2_by_pk(pk_columns: $pk_columns, _set: $_set) {
-            currency_id
-            description
-            symbol
-        }
+    mutation update_Currency2_by_pk($currency_id: Int!, $description: String!, $symbol: String!) {
+        update_Currency2_by_pk(object: {
+            currency_id: $currency_id, 
+            description: $description, 
+            symbol: $symbol}) {
+                currency_id
+                description
+                symbol
+            }
     }
 `
 
