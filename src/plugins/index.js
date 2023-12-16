@@ -17,4 +17,5 @@ export function registerPlugins (app) {
     .use(vuetify)
     .use(router)
     .use(apolloClient1)
+    // .use(apolloProvider)
 }

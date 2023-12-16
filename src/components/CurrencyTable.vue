@@ -28,7 +28,6 @@
           vertical
         ></v-divider>
         <v-spacer></v-spacer>
-        <!-- <button @click="query.refetch()">Refresh</button> -->
         <v-dialog
           v-model="dialog"
           max-width="500px"
@@ -159,6 +158,7 @@
     createHttpLink,
     InMemoryCache,
   } from "@apollo/client/core";
+  //  import { apolloProvider } from "../plugins";
 
   export default {
  
@@ -193,13 +193,6 @@
 
   methods: {
       initialize () {
-      // debugger;
-      //  axios
-      //   .get('http://localhost:8090/api/rest/Currency')
-      //   .then((response) => {
-      //     console.log(response);
-      //     this.currencies = response.data.currency
-      //   })
       
       },
 
@@ -321,6 +314,7 @@
 
     // Insert Currency
     const { mutate: insertCurrency } = provideApolloClient(apolloClient)(() =>
+    // const { mutate: insertCurrency } = apolloProvider(() =>
       useMutation(INSERT_CURRENCY_ONE, {
 
         update: (cache, { data: { insert_Currency2_one } }) => {  
@@ -344,18 +338,23 @@
     const { mutate: updateCurrency } = provideApolloClient(apolloClient)(() =>
      useMutation(UPDATE_CURRENCY_BY_PK , 
         {
-          update: (cache, { data: { update_Currency2_by_pk } }) => {
-            let data = cache.readQuery({ query: my_currency })
-            var variables = update_Currency2_by_pk;
-            data = {
-              ...data,
-              Currency2: [
-                ...data.Currency2,
-                variables,
-              ],
-            }
-            cache.writeQuery({ query: my_currency, data })
-          }  
+
+            update(cache, { data: { update_Currency2_by_pk } }) {
+              const existingCurrencies = cache.readQuery({ query: my_currency });
+              const newCurrencies = existingCurrencies.Currency2.map((t) => {
+
+                if (t.currency_id === update_Currency2_by_pk.currency_id) {
+                  return update_Currency2_by_pk ;
+                } else {
+                  return t;
+                }
+              });
+              cache.writeQuery({
+                query: my_currency,
+                data: {Currency2: newCurrencies}
+              });
+            },
+
         }
 
      )); 

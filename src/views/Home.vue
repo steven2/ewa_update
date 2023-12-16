@@ -1,9 +1,7 @@
 <template>
   <CurrencyTableD />
-   <!-- <dataTable /> -->
 </template>
 
 <script setup>
-  import CurrencyTableD from '@/components/CurrencyTableD.vue'
-  // import dataTable from '@/components/dataTable.vue'
+  import CurrencyTableD from '@/components/CurrencyTable.vue'
 </script>
